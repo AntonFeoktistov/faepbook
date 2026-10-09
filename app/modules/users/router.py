@@ -85,3 +85,17 @@ async def refresh(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
 @router.get("/me/", response_model=UserResponse)
 async def me(user: User = Depends(get_current_user)):
     return user
+
+
+@router.post("/make-me-admin/", response_model=UserResponse)
+async def make_me_admin(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """ВРЕМЕННЫЙ эндпоинт для разработки: делает текущего юзера админом."""
+    if user.is_admin:
+        return user
+    user.is_admin = True
+    await db.commit()
+    await db.refresh(user)
+    return user
