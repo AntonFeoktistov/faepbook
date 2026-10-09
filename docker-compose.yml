@@ -27,6 +27,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: faepbook-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:80"
+  #   depends_on:
+  #     - web
 
 volumes:
   pgdata:

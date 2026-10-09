@@ -83,10 +83,11 @@ class Book(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
-    author_id: Mapped[int] = mapped_column(
+
+    author_id: Mapped[int | None] = mapped_column(
         Integer,
-        ForeignKey("authors.id", ondelete="CASCADE"),
-        nullable=False,
+        ForeignKey("authors.id", ondelete="SET NULL"),
+        nullable=True,
         index=True,
     )
 
@@ -109,7 +110,7 @@ class Book(Base):
     content_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
     quotes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    author: Mapped["Author"] = relationship(
+    author: Mapped["Author | None"] = relationship(
         "Author",
         back_populates="books",
         lazy="selectin",
@@ -122,6 +123,5 @@ class Book(Base):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<Book {self.title} by {self.author.name if self.author else 'unknown'}>"
-        )
+        author_name = self.author.name if self.author else "без автора"
+        return f"<Book {self.title} by {author_name}>"

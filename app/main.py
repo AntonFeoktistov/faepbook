@@ -5,6 +5,7 @@ from fastapi.responses import JSONResponse
 from sqladmin import Admin
 
 from app.database import engine
+from app.modules.catalog.admin import AuthorAdmin, BookAdmin, CategoryAdmin
 from app.modules.catalog.authors.router import router as authors_router
 from app.modules.catalog.books.router import router as books_router
 from app.modules.catalog.categories.router import router as categories_router
@@ -35,6 +36,9 @@ async def validation_handler(request: Request, exc: ValidationError):
 # Админка
 admin = Admin(app, engine)
 admin.add_view(UserAdmin)
+admin.add_view(AuthorAdmin)
+admin.add_view(CategoryAdmin)
+admin.add_view(BookAdmin)
 
 # Роутеры
 app.include_router(users_router)
