@@ -1,6 +1,6 @@
 import asyncio
 
-# Добавляем корень проекта в sys.path, чтобы работали импорты из app.*
+# Корень проекта в sys.path
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -13,14 +13,12 @@ from alembic import context
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-# Импортируем Base и все модели
+# Импорт Base и моделей
 from app.config import settings
 from app.database import Base
 from app.models import *
 
 config = context.config
-
-# Подменяем URL из alembic.ini на реальный из настроек
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
 if config.config_file_name is not None:
@@ -29,13 +27,25 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def run_migrations_offline() -> None:
+    """Offline mode — без подключения к БД."""
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+        compare_type=True,
+    )
+    with context.begin_transaction():
+        context.run_migrations()
+
+
 def do_run_migrations(connection: Connection) -> None:
     context.configure(
         connection=connection,
         target_metadata=target_metadata,
         compare_type=True,
-        # Для SQLite (если будете тестировать локально без Postgres)
-        render_as_batch=False,
     )
     with context.begin_transaction():
         context.run_migrations()
@@ -56,4 +66,8 @@ def run_migrations_online() -> None:
     asyncio.run(run_async_migrations())
 
 
-run_migrations_online()
+# ЭТО КЛЮЧЕВОЕ: вызывается ТОЛЬКО когда Alembic готов
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
